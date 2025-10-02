@@ -9,6 +9,7 @@ import type { CommandContext } from '../ui/commands/types.js';
 import type { LoadedSettings } from '../config/settings.js';
 import type { GitService } from '@google/gemini-cli-core';
 import type { SessionStatsState } from '../ui/contexts/SessionContext.js';
+import { deepMerge } from '../utils/deepMerge.js';
 
 // A utility type to make all properties of an object, and its nested objects, partial.
 type DeepPartial<T> = T extends object
@@ -76,29 +77,5 @@ export const createMockCommandContext = (
     },
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const merge = (target: any, source: any): any => {
-    const output = { ...target };
-
-    for (const key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        const sourceValue = source[key];
-        const targetValue = output[key];
-
-        if (
-          // We only want to recursivlty merge plain objects
-          Object.prototype.toString.call(sourceValue) === '[object Object]' &&
-          Object.prototype.toString.call(targetValue) === '[object Object]'
-        ) {
-          output[key] = merge(targetValue, sourceValue);
-        } else {
-          // If not, we do a direct assignment. This preserves Date objects and others.
-          output[key] = sourceValue;
-        }
-      }
-    }
-    return output;
-  };
-
-  return merge(defaultMocks, overrides);
+  return deepMerge(defaultMocks, overrides);
 };
